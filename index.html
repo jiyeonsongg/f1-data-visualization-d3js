@@ -1,0 +1,93 @@
+<html>  
+<head>  
+<script type="text/javascript" src="app.js"></script>  
+<link rel="stylesheet" href="styles.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+
+</head>
+<body onload=final_project()> 
+
+<!-- QUESTION 1: SCATTER PLOT -->
+<div id = "title">
+    <h1 class = "section">Formula 1: </h1>
+    <h2 class = "section">I love Lewis</h2>
+    <br>
+    <br>
+</div>
+
+<div>
+<h3>Question 1: Correlation between Starting position and Final position</h3>
+
+<div id="q1"></div>
+    <h4>Plot:</h4>
+    <div id="q1_plot" class="center_plot"></div>
+    <br>
+</div>
+
+
+<!-- QUESTION 2: WORD CLOUD -->
+<div>
+    <h3>Question 2-a: Which driver went on the podium(the first, second, and third-placed drivers) the most?</h3>
+      
+    <div id="q2a"></div>
+        <h4>Plot:</h4>
+        <div id="q2a_plot" class="center_plot"></div>
+        <br>
+</div>
+
+
+<!-- QUESTION 2: WORD CLOUD -->
+<div>
+    <h3>Question 2-b: Which constructor went on the podium(the first, second, and third-placed drivers) the most?</h3>
+      
+    <div id="q2b"></div>
+        <h4>Plot:</h4>
+        <div id="q2b_plot" class="center_plot"></div>
+        <br>
+</div>
+
+
+<!-- QUESTION 3: STACKED STREAMGRAPH -->
+<div>
+    <h3>Question 3: Between Hamilton, Vettel, Verstappen, Alonso, and Räikkönen, who earned the most points in Grand Prix Championships from 2000 to 2022?</h3>
+      
+    <div id="q3"></div>
+        <h4>Plot:</h4>
+        <div id="q3_plot" class="center_plot"></div>
+        <br>
+</div>
+
+
+<!-- QUESTION 4: WORLD MAP -->
+<div>
+    <h3>Question 4: Map of Formula One circuits </h3>
+      
+    <div id="q4"></div>
+        <h4>Plot:</h4>
+        <div id="q4_plot" class="center_plot"></div>
+        <br>
+</div>
+
+
+<!-- QUESTION 5: BOX PLOT -->
+<div>
+    <h3>Question 5: Qualifying time distribution for Lewis Hamilton, Fernando Alonso, Kimi Räikkönen</h3>
+     <div id="radio_q5" class="center_plot">
+            <input type="radio" id="q5_2008" name="year" value="2008" checked="checked">
+            <label for="2008">2008</label>
+            <input type="radio" id="q5_2012" name="year" value="2012">
+            <label for="2012">2012</label>
+            <input type="radio" id="q5_2016" name="year" value="2016">
+            <label for="2016">2016</label>
+    </div>
+          
+    <div id="q5"></div>
+        <h4>Plot:</h4>
+        <div id="q5_plot" class="center_plot"></div>
+        <br>
+</div>
+
+   
+</body>  
+</html>  
