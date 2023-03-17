@@ -126,7 +126,7 @@ var question2a=function(filePath){
                 .data(words)
                 .enter().append("text")
                 .style("font-size", function(d) { return d.size; })
-                .style("fill", "#69b3a2")
+                .style("fill", "#FF1801")
                 .attr("text-anchor", "middle")
                 .style("font-family", "Impact")
                 .attr("transform", function(d) {
@@ -166,11 +166,10 @@ var question3=function(filePath){
 // QUESTION 4: WORLD MAP
 var question4=function(filePath){
     d3.csv(filePath).then(function(data){
-        // console.log(data);
-        var width = 800;
-        var height = 700;
+        var width = 1000;
+        var height = 650;
 
-        const projection1 = d3.geoNaturalEarth1().scale(140).translate([width/2, height/2])
+        const projection1 = d3.geoNaturalEarth1().scale(180).translate([width/2, height/2])
         const pathgeo1 = d3.geoPath().projection(projection1)
 
         var svg4 = d3.select('#q4_plot')
@@ -181,7 +180,7 @@ var question4=function(filePath){
         svg4.append('path')
             .attr('class', 'sphere')
             .attr('d', pathgeo1({type: 'Sphere'}))
-            .attr('fill', 'white')
+            .attr('fill', '#8AE0FF')
 
         // var linear = d3.scaleLinear().domain([d3.min(data, d => d.Count), d3.max(pointLst, d => d.Count)]).range([2, 20])
 
@@ -192,29 +191,30 @@ var question4=function(filePath){
                 .enter()
                 .append('path')
                 .attr('d', pathgeo1)
-                .attr('fill', 'pink')
-                .attr('stroke', 'white')
+                .attr('fill', '#68FF66')
+                .attr('stroke', '#00C129')
         
         // TOOLTIP
 
-        // create population circles
+        })
+        // create circles --> NEED TO BRING THIS FRONT
+        console.log(data)
         svg4.selectAll('circle')
             .data(data)
             .enter()
             .append('circle')
             .attr('cx', d => projection1([parseFloat(d.longitude), parseFloat(d.latitude)])[0])
             .attr('cy', d => projection1([parseFloat(d.longitude), parseFloat(d.latitude)])[1])
-            .attr('r', 5)
-            .style('fill', 'magenta')
-            // .attr('stroke', 'red')
-            // .attr('stroke-width', 1)
-            // .attr('fill-opacity', 0.5)
-        })
+            .attr('r', 3)
+            .style('fill', '#FF1801')
+            .attr('stroke', 'red')
+            .attr('stroke-width', 1)
+            .attr('fill-opacity', 0.5)
         
         // plot title
         svg4.append('text')
             .attr('x', width/2)
-            .attr('y', 100)
+            .attr('y', 50)
             .attr('text-anchor', 'middle')
             .style('font-size', '15px')
             .text('World Map of Formula One Circuits');
@@ -224,7 +224,7 @@ var question4=function(filePath){
 // QUESTION 5: BOX PLOT
 var question5=function(filePath){
     d3.csv(filePath).then(function(data){
-        console.log(data);
+        // console.log(data);
         const margin = {top: 30, right: 30, bottom: 30, left: 30}
         const width = 900 - margin.left - margin.right
         const height = 800 - margin.top - margin.bottom
