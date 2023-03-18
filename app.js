@@ -165,7 +165,7 @@ var question3=function(filePath){
 
 // QUESTION 4: WORLD MAP
 var question4=function(filePath){
-    d3.csv(filePath).then(function(data){
+    d3.csv(filePath).then(function(dataOrigin){
         var width = 1000;
         var height = 650;
 
@@ -186,6 +186,8 @@ var question4=function(filePath){
 
         const worldPath = 'world.json'
         d3.json(worldPath).then(function(data){
+
+            // map the graph
             svg4.selectAll('path')
                 .data(data.features)
                 .enter()
@@ -193,23 +195,52 @@ var question4=function(filePath){
                 .attr('d', pathgeo1)
                 .attr('fill', '#68FF66')
                 .attr('stroke', '#00C129')
-        
-        // TOOLTIP
+            
+            // ToolTip --> not align with the mouse
+            var Tooltip = d3.select('#q4_plot')
+                .append('div')
+                .attr('class', 'tooltip')
+                .style('opacity', 0)
+                .style('background-color', 'white')
+                .style('border', 'solid')
+                .style('border-width', '2px')
+                .style('border-radious', '5px')
+                .style('padding', '5px');
 
+            const mouseover = function(e, d) {
+                // Tooltip.style('opacity', 1)
+                // d3.select(this).style('stroke', 'black').style('opacity', 1)
+                // Tooltip.html('Country: ' + d.country + '<br>' + 'Circuit: ' + d.name)
+                //     .style('left', (e.pageX) + 'px')
+                //     .style('top', (e.pageY) + 'px')
+                Tooltip.transition().duration(50).style('opacity', 0.9)
+            }
+            const mousemove = function (e, d) {
+                var coords = d3.pointer(e)
+                Tooltip.html('Country: ' + d.country + '<br>' + 'Circuit: ' + d.name)
+                    .style('left', coords[0])
+                    .style('top', coords[1])
+            }
+            const mouseout = function (e, d) {
+                Tooltip.transition().duration(50).style('opacity', 0);
+            }
+
+            // create circles
+            svg4.selectAll('circle')
+                .data(dataOrigin)
+                .enter()
+                .append('circle')
+                .attr('cx', d => projection1([parseFloat(d.longitude), parseFloat(d.latitude)])[0])
+                .attr('cy', d => projection1([parseFloat(d.longitude), parseFloat(d.latitude)])[1])
+                .attr('r', 4)
+                .style('fill', '#FF1801')
+                .attr('stroke', 'red')
+                .attr('stroke-width', 1)
+                .attr('fill-opacity', 0.5)
+                    .on('mouseover', mouseover)
+                    .on('mousemove', mousemove)
+                    .on('mouseout', mouseout)
         })
-        // create circles --> NEED TO BRING THIS FRONT
-        console.log(data)
-        svg4.selectAll('circle')
-            .data(data)
-            .enter()
-            .append('circle')
-            .attr('cx', d => projection1([parseFloat(d.longitude), parseFloat(d.latitude)])[0])
-            .attr('cy', d => projection1([parseFloat(d.longitude), parseFloat(d.latitude)])[1])
-            .attr('r', 3)
-            .style('fill', '#FF1801')
-            .attr('stroke', 'red')
-            .attr('stroke-width', 1)
-            .attr('fill-opacity', 0.5)
         
         // plot title
         svg4.append('text')
@@ -224,7 +255,13 @@ var question4=function(filePath){
 // QUESTION 5: BOX PLOT
 var question5=function(filePath){
     d3.csv(filePath).then(function(data){
-        // console.log(data);
+        year_group = Array.from(d3.group(data, d => parseInt(d.year)))
+        var year_dict = {
+            '2008': year_group[0][1],
+            '2012': year_group[1][1],
+            '2016': year_group[2][1]
+        }
+
         const margin = {top: 30, right: 30, bottom: 30, left: 30}
         const width = 900 - margin.left - margin.right
         const height = 800 - margin.top - margin.bottom
@@ -258,9 +295,29 @@ var question5=function(filePath){
         svg5.append("g")
             .attr("transform", "translate(0," + height + ")")
             .call(d3.axisBottom(x))
-        var y = d3.scaleLinear()
+        var y = d3.scaleTime()
             .domain([3,9])
             .range([height, 0])
         svg5.append("g").call(d3.axisLeft(y))
+
+        // // ratio buttons
+        // var radio = d3.selectAll('#radio_q5')
+        //     .attr('name', 'year')
+        //     .on('change', function(d){
+        //         current_year = d.target.value;
+        //         c_data = year_dict[current_year];
+                
+        //         yScale = d3.scaleTime()
+        //             .domain([d3.min(c_data, d => d.qualifying), d3.max(c_data, d => d.qualifying)])
+        //             .range([0, height])
+        //         yAxis = d3.axisLeft().scale(yScale);
+        //         d3.selectAll('[name = yAxis]')
+        //             .transition()
+        //             .call(yAxis)
+        //             .duration(100)
+
+        //         // bring new box plot
+
+        //     })
     });
 }
