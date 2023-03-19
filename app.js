@@ -319,7 +319,8 @@ var question5=function(filePath){
                 q3,
                 interQuantileRange,
                 min,
-                max
+                max,
+                sortedValues
             };
         });
 
@@ -329,6 +330,7 @@ var question5=function(filePath){
             .data(groupedData)
             .enter()
             .append("line")
+            .attr('name', 'q5_line')
             .attr("x1", function(d){return(xScale(d.driver))})
             .attr("x2", function(d){return(xScale(d.driver))})
             .attr("y1", d => yScale(d.min))
@@ -342,6 +344,7 @@ var question5=function(filePath){
             .data(groupedData)
             .enter()
             .append("rect")
+            .attr('name', 'q5_box')
                 .attr("x", function(d){return(xScale(d.driver)-boxWidth/2)})
                 .attr("y", function(d){return(yScale(d.q3))})
                 .attr("height", function(d){return(yScale(d.q1)-yScale(d.q3))})
@@ -354,6 +357,7 @@ var question5=function(filePath){
         .data(groupedData)
         .enter()
         .append("line")
+        .attr('name', 'q5_med')
             .attr("x1", function(d){return(xScale(d.driver)-boxWidth/2)})
             .attr("x2", function(d){return(xScale(d.driver)+boxWidth/2)})
             .attr("y1", function(d){return(yScale(d.median))})
@@ -364,33 +368,105 @@ var question5=function(filePath){
         // Add individual points with jitter
         var jitterWidth = 50
         svg5.selectAll("indPoints")
-            .data(groupedData)
+            .data(c_data)
             .enter()
             .append("circle")
-                .attr("cx", function(d){return(xScale(d.driver) - jitterWidth/2 + Math.random()*jitterWidth )})
-                .attr("cy", function(d){return(yScale(d.Sepal_Length))})
+            .attr('name', 'q5_dot')
+                .attr("cx", function(d){return(xScale(d.driver) - jitterWidth/2 + Math.random()*jitterWidth)})
+                .attr("cy", function(d){return(yScale(d.qualifying))})
                 .attr("r", 4)
                 .style("fill", "white")
                 .attr("stroke", "black")
 
-        // // ratio buttons
-        // var radio = d3.selectAll('#radio_q5')
-        //     .attr('name', 'year')
-        //     .on('change', function(d){
-        //         current_year = d.target.value;
-        //         c_data = year_dict[current_year];
+        // ratio buttons
+        var radio = d3.selectAll('#radio_q5')
+            .attr('name', 'year')
+            .on('change', function(d){
+                current_year = d.target.value;
+                c_data = year_dict[current_year];
                 
-        //         yScale = d3.scaleTime()
-        //             .domain([d3.min(c_data, d => d.qualifying), d3.max(c_data, d => d.qualifying)])
-        //             .range([0, height])
-        //         yAxis = d3.axisLeft().scale(yScale);
-        //         d3.selectAll('[name = yAxis]')
-        //             .transition()
-        //             .call(yAxis)
-        //             .duration(100)
+            // new yScale
+            var yScale = d3.scaleLinear()
+                .domain([d3.min(c_data, d => parseFloat(d.qualifying))-3000, d3.max(c_data, d => parseFloat(d.qualifying))+1000])
+                .range([height, 0])
+            yAxis = d3.axisLeft().scale(yScale);
+            d3.selectAll('[name = yAxis]')
+                .transition()
+                .call(yAxis)
+                .duration(100)
+                
+                // another way to do sumstat without using d3.nest()
+            const groupedData = Array.from(d3.group(c_data, d => d.driver)).map(([key, values]) => {
+                const sortedValues = values.map(d => parseFloat(d.qualifying)).sort(d3.ascending);
+                const q1 = d3.quantile(sortedValues, 0.25);
+                const median = d3.quantile(sortedValues, 0.5);
+                const q3 = d3.quantile(sortedValues, 0.75);
+                const interQuantileRange = q3 - q1;
+                const min = q1 - 1.5 * interQuantileRange;
+                const max = q3 + 1.5 * interQuantileRange;
 
-        //         // bring new box plot
+                return {
+                    driver: key,
+                    q1,
+                    median,
+                    q3,
+                    interQuantileRange,
+                    min,
+                    max,
+                    sortedValues
+                };
+            });
 
-        //     })
+            // svg start
+            var boxWidth = 70
+            svg5.selectAll("[name = q5_line]")
+                .data(groupedData)
+                .enter()
+                .append("line")
+                .attr("x1", function(d){return(xScale(d.driver))})
+                .attr("x2", function(d){return(xScale(d.driver))})
+                .attr("y1", d => yScale(d.min))
+                .attr("y2", d => yScale(d.max))
+                .attr("stroke", "black")
+                .style("width", 40)
+
+            // rectangle for the main box
+            var boxWidth = 100
+            svg5.selectAll("[name = q5_box]")
+                .data(groupedData)
+                .enter()
+                .append("rect")
+                    .attr("x", function(d){return(xScale(d.driver)-boxWidth/2)})
+                    .attr("y", function(d){return(yScale(d.q3))})
+                    .attr("height", function(d){return(yScale(d.q1)-yScale(d.q3))})
+                    .attr("width", boxWidth)
+                    .attr("stroke", "black")
+                    .style("fill", "#FF1801")
+
+            // Show the median
+            svg5.selectAll("[name = a5_med]")
+                .data(groupedData)
+                .enter()
+                .append("line")
+                    .attr("x1", function(d){return(xScale(d.driver)-boxWidth/2)})
+                    .attr("x2", function(d){return(xScale(d.driver)+boxWidth/2)})
+                    .attr("y1", function(d){return(yScale(d.median))})
+                    .attr("y2", function(d){return(yScale(d.median))})
+                    .attr("stroke", "black")
+                    .style("width", 80)
+
+            // Add individual points with jitter
+            var jitterWidth = 50
+            svg5.selectAll("[name = q5_dot]")
+                .data(c_data)
+                .enter()
+                .append("circle")
+                    .attr("cx", function(d){return(xScale(d.driver) - jitterWidth/2 + Math.random()*jitterWidth)})
+                    .attr("cy", function(d){return(yScale(d.qualifying))})
+                    .attr("r", 4)
+                    .style("fill", "white")
+                    .attr("stroke", "black")
+
+                })
     });
 }
