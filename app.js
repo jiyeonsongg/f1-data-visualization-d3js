@@ -29,20 +29,23 @@ var question1=function(filePath){
             .attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
-            .attr('transform', `translate(${margin.left}, ${margin.top})`);
+            .attr('transform', `translate(${margin.left+20}, ${margin.top})`);
         
         // add X axis
         const x = d3.scaleLinear()
-            .domain([0, d3.max(data, d => parseFloat(d.finish))])
+            .domain([d3.min(data, d => parseFloat(d.lap_time)), d3.max(data, d => parseFloat(d.lap_time))])
             .range([0, width]);
+        
+        // var xAxis = svg1.append('g').attr("transform", `translate(0, ${height})`).call(d3.axisBottom(x));
         svg1.append("g")
             .attr("transform", `translate(0, ${height})`)
             .call(d3.axisBottom(x));
 
         // add Y axis
         const y = d3.scaleLinear()
-            .domain([0, d3.max(data, d => parseFloat(d.start))])
+            .domain([d3.min(data, d => parseFloat(d.pit_stop)), d3.max(data, d => parseFloat(d.pit_stop))])
             .range([height, 0]);
+        // var yAxis = svg1.append("g").call(d3.axisLeft(y));
         svg1.append("g")
             .call(d3.axisLeft(y));
         
@@ -64,7 +67,7 @@ var question1=function(filePath){
         
         const mousemove = function(event, d) {
             Tooltip
-            .html(`Driver Info: ${d.driver}`)
+            .html(`Driver Info: ${d.driver}`+ '<br>' +`Race Info: ${d.race}`)
             .style("left", (event.x)/2 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
             .style("top", (event.y)/2 + "px")
         }
@@ -77,20 +80,83 @@ var question1=function(filePath){
             .style("opacity", 0)
         }
 
+        // // Add a clipPath: everything out of this area won't be drawn.
+        // var clip = svg1.append("defs").append("SVG:clipPath")
+        //     .attr("id", "clip")
+        //     .append("SVG:rect")
+        //     .attr("width", width )
+        //     .attr("height", height )
+        //     .attr("x", 0)
+        //     .attr("y", 0);
+
         // add dots
         svg1.append('g')
+            // .attr('clip=path', 'url(#clip)')
             .selectAll("dot")
             .data(data)
             .enter()
             .append("circle")
-            .attr("cx", function (d) { return x(parseFloat(d.finish)); } )
-            .attr("cy", function (d) { return y(parseFloat(d.start)); } )
+            .attr("cx", function (d) { return x(parseFloat(d.lap_time)); } )
+            .attr("cy", function (d) { return y(parseFloat(d.pit_stop)); } )
             .attr("r", 5)
             .style("fill", "#FF1801")
             .style("opacity", 0.3)
             .on("mouseover", mouseover )
             .on("mousemove", mousemove )
             .on("mouseleave", mouseleave )
+        
+        // // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
+        // var zoom = d3.zoom()
+        //     .scaleExtent([.5, 20])  // This control how much you can unzoom (x0.5) and zoom (x20)
+        //     .extent([[0, 0], [width, height]])
+        //     .on("zoom", updateChart);
+        //         });
+        // // This add an invisible rect on top of the chart area. This rect can recover pointer events: necessary to understand when the user zoom
+        // svg1.append("rect")
+        //     .attr("width", width)
+        //     .attr("height", height)
+        //     .style("fill", "none")
+        //     .style("pointer-events", "all")
+        //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+        //     .call(zoom);
+
+        // // A function that updates the chart when the user zoom and thus new boundaries are available
+        // function updateChart() {
+
+        //     // recover the new scale
+        //     var newX = d3.event.transform.rescaleX(x);
+        //     var newY = d3.event.transform.rescaleY(y);
+
+        //     // update axes with these new boundaries
+        //     xAxis.call(d3.axisBottom(newX))
+        //     yAxis.call(d3.axisLeft(newY))
+
+        //     // update circle position
+        //     svg1
+        //     .selectAll("circle")
+        //     .attr('cx', function(d) {return newX(parseFloat(d.lap_time))})
+        //     .attr('cy', function(d) {return newY(parseFloat(d.pit_stop))});
+
+        // plot title
+        svg1.append('text')
+            .attr('x', width/2)
+            .attr('y', -20)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '15px')
+            .text('Pit stop vs. Lap time in millisecond');
+            
+        // plot axis title (reference from StackOverflow)
+        svg1.append('text')
+            .attr("text-anchor", "end")
+            .attr("x", width-20)
+            .attr("y", height-10)
+            .text("Lap Time (msec)");
+        svg1.append("text")
+            .attr("text-anchor", "end")
+            .attr("y", 10)
+            .attr("dy", ".90em")
+            .attr("transform", "rotate(-90)")
+            .text("Pit Stop (msec)");
     });
 }
 
@@ -216,7 +282,7 @@ var question4=function(filePath){
                 Tooltip.transition().duration(50).style('opacity', 0.9)
             }
             const mousemove = function (e, d) {
-                var coords = d3.pointer(e)
+                var coords = d3.pointer(e) // look more examples
                 Tooltip.html('Country: ' + d.country + '<br>' + 'Circuit: ' + d.name)
                     .style('left', coords[0])
                     .style('top', coords[1])
@@ -385,88 +451,84 @@ var question5=function(filePath){
                 current_year = d.target.value;
                 c_data = year_dict[current_year];
                 
-            // new yScale
-            var yScale = d3.scaleLinear()
-                .domain([d3.min(c_data, d => parseFloat(d.qualifying))-3000, d3.max(c_data, d => parseFloat(d.qualifying))+1000])
-                .range([height, 0])
-            yAxis = d3.axisLeft().scale(yScale);
-            d3.selectAll('[name = yAxis]')
-                .transition()
-                .call(yAxis)
-                .duration(100)
-                
+                // new yScale
+                var yScale = d3.scaleLinear()
+                    .domain([d3.min(c_data, d => parseFloat(d.qualifying))-3000, d3.max(c_data, d => parseFloat(d.qualifying))+1000])
+                    .range([height, 0])
+                yAxis = d3.axisLeft().scale(yScale);
+                d3.selectAll('[name = yAxis]')
+                    .transition()
+                    .call(yAxis)
+                    .duration(100)
+                    
                 // another way to do sumstat without using d3.nest()
-            const groupedData = Array.from(d3.group(c_data, d => d.driver)).map(([key, values]) => {
-                const sortedValues = values.map(d => parseFloat(d.qualifying)).sort(d3.ascending);
-                const q1 = d3.quantile(sortedValues, 0.25);
-                const median = d3.quantile(sortedValues, 0.5);
-                const q3 = d3.quantile(sortedValues, 0.75);
-                const interQuantileRange = q3 - q1;
-                const min = q1 - 1.5 * interQuantileRange;
-                const max = q3 + 1.5 * interQuantileRange;
+                const groupedData = Array.from(d3.group(c_data, d => d.driver)).map(([key, values]) => {
+                    const sortedValues = values.map(d => parseFloat(d.qualifying)).sort(d3.ascending);
+                    const q1 = d3.quantile(sortedValues, 0.25);
+                    const median = d3.quantile(sortedValues, 0.5);
+                    const q3 = d3.quantile(sortedValues, 0.75);
+                    const interQuantileRange = q3 - q1;
+                    const min = q1 - 1.5 * interQuantileRange;
+                    const max = q3 + 1.5 * interQuantileRange;
 
-                return {
-                    driver: key,
-                    q1,
-                    median,
-                    q3,
-                    interQuantileRange,
-                    min,
-                    max,
-                    sortedValues
-                };
-            });
+                    return {
+                        driver: key,
+                        q1,
+                        median,
+                        q3,
+                        interQuantileRange,
+                        min,
+                        max,
+                        sortedValues
+                    };
+                });
 
-            // svg start
-            var boxWidth = 70
-            svg5.selectAll("[name = q5_line]")
-                .data(groupedData)
-                .enter()
-                .append("line")
-                .attr("x1", function(d){return(xScale(d.driver))})
-                .attr("x2", function(d){return(xScale(d.driver))})
-                .attr("y1", d => yScale(d.min))
-                .attr("y2", d => yScale(d.max))
-                .attr("stroke", "black")
-                .style("width", 40)
-
-            // rectangle for the main box
-            var boxWidth = 100
-            svg5.selectAll("[name = q5_box]")
-                .data(groupedData)
-                .enter()
-                .append("rect")
-                    .attr("x", function(d){return(xScale(d.driver)-boxWidth/2)})
-                    .attr("y", function(d){return(yScale(d.q3))})
-                    .attr("height", function(d){return(yScale(d.q1)-yScale(d.q3))})
-                    .attr("width", boxWidth)
+                // svg start
+                var boxWidth = 70
+                svg5.selectAll("[name = q5_line]")
+                    .data(groupedData)
+                    .transition()
+                    .attr("x1", function(d){return(xScale(d.driver))})
+                    .attr("x2", function(d){return(xScale(d.driver))})
+                    .attr("y1", d => yScale(d.min))
+                    .attr("y2", d => yScale(d.max))
                     .attr("stroke", "black")
-                    .style("fill", "#FF1801")
+                    .style("width", 40)
 
-            // Show the median
-            svg5.selectAll("[name = a5_med]")
-                .data(groupedData)
-                .enter()
-                .append("line")
-                    .attr("x1", function(d){return(xScale(d.driver)-boxWidth/2)})
-                    .attr("x2", function(d){return(xScale(d.driver)+boxWidth/2)})
-                    .attr("y1", function(d){return(yScale(d.median))})
-                    .attr("y2", function(d){return(yScale(d.median))})
-                    .attr("stroke", "black")
-                    .style("width", 80)
+                // rectangle for the main box
+                var boxWidth = 100
+                svg5.selectAll("[name = q5_box]")
+                    .data(groupedData)
+                    .transition()
+                        .attr("x", function(d){return(xScale(d.driver)-boxWidth/2)})
+                        .attr("y", function(d){return(yScale(d.q3))})
+                        .attr("height", function(d){return(yScale(d.q1)-yScale(d.q3))})
+                        .attr("width", boxWidth)
+                        .attr("stroke", "black")
+                        .style("fill", "#FF1801")
 
-            // Add individual points with jitter
-            var jitterWidth = 50
-            svg5.selectAll("[name = q5_dot]")
-                .data(c_data)
-                .enter()
-                .append("circle")
-                    .attr("cx", function(d){return(xScale(d.driver) - jitterWidth/2 + Math.random()*jitterWidth)})
-                    .attr("cy", function(d){return(yScale(d.qualifying))})
-                    .attr("r", 4)
-                    .style("fill", "white")
-                    .attr("stroke", "black")
+                // Show the median
+                svg5.selectAll("[name = a5_med]")
+                    .data(groupedData)
+                    .transition()
+                        .attr("x1", function(d){return(xScale(d.driver)-boxWidth/2)})
+                        .attr("x2", function(d){return(xScale(d.driver)+boxWidth/2)})
+                        .attr("y1", function(d){return(yScale(d.median))})
+                        .attr("y2", function(d){return(yScale(d.median))})
+                        .attr("stroke", "black")
+                        .style("width", 80)
 
-                })
+                // Add individual points with jitter
+                var jitterWidth = 50
+                svg5.selectAll("[name = q5_dot]")
+                    .data(c_data)
+                    .transition()
+                        .attr("cx", function(d){return(xScale(d.driver) - jitterWidth/2 + Math.random()*jitterWidth)})
+                        .attr("cy", function(d){return(yScale(d.qualifying))})
+                        .attr("r", 4)
+                        .style("fill", "white")
+                        .attr("stroke", "black")
+
+            })
     });
 }
