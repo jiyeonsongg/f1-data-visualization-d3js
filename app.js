@@ -145,7 +145,7 @@ var question1=function(filePath){
             .style('font-size', '15px')
             .text('Pit stop vs. Lap time in millisecond');
             
-        // plot axis title (reference from StackOverflow)
+        // plot axis title
         svg1.append('text')
             .attr("text-anchor", "end")
             .attr("x", width-20)
@@ -207,14 +207,54 @@ var question2a=function(filePath){
 // QUESTION 2: WORD CLOUD - CONSTRUCTORS
 var question2b=function(filePath){
     d3.csv(filePath).then(function(data){
-        // console.log(data);
+        console.log(data);
+        const margin = {top: 30, right: 30, bottom: 30, left: 30}
+        const width = 900 - margin.left - margin.right
+        const height = 800 - margin.top - margin.bottom
+
+        const svg2b = d3.select("#q2b_plot")
+            .append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+        var sizeScale = d3.scaleLinear() // NOT WORKING
+            .domain([d3.min(data, d => parseFloat(d.podium)), d3.max(data, d => parseFloat(d.podium))])
+            .range([height, 0]);
+
+        var layout = d3.layout.cloud()
+            .size([width, height])
+            .words(data.map(function(d) { return {text: d.constructor, size: parseFloat(d.podium)}; }))
+            .padding(5)        //space between words
+            .rotate(function() { return ~~(Math.random() * 2) * 90; })
+            .fontSize(function(d) { return d.size; })      // font size of words
+            .on("end", draw);
+        layout.start();
+
+        function draw(words) {
+            svg2b
+              .append("g")
+                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size; })
+                .style("fill", "#FF1801")
+                .attr("text-anchor", "middle")
+                .style("font-family", "Impact")
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
+        }
+
     });
 }
 
 // QUESTION 3: STACKED STREAMGRAPH
 var question3=function(filePath){
     d3.csv(filePath).then(function(data){
-        // console.log(data);
         const margin = {top: 30, right: 30, bottom: 30, left: 30}
         const width = 900 - margin.left - margin.right
         const height = 800 - margin.top - margin.bottom
@@ -224,7 +264,58 @@ var question3=function(filePath){
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
-            .attr('transform', `translate(${margin.left}, ${margin.top})`);
+            .attr('transform', `translate(${margin.left+10}, ${margin.top})`);
+
+        var keys = data.columns.slice(1);
+
+        //define scaling
+        var xScale = d3.scaleLinear()
+            .domain([d3.min(data, d => parseFloat(d.year)), d3.max(data, d => parseFloat(d.year))])
+            .range([0, width]);
+        svg3.append("g").attr('transform', `translate(0, ${height})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+
+        var yScale = d3.scaleLinear()
+            .domain([0, 1500])
+            .range([height, 0]);
+        svg3.append("g")
+            .call(d3.axisLeft(yScale));
+
+        var colors = d3.scaleOrdinal(d3.schemeSpectral[5]).domain(keys);
+
+        //Stack the data
+        var stacked  = d3.stack().keys(keys)(data);
+
+        // Generate streamgraph
+        svg3.selectAll(".area").data(stacked).enter()
+        .append("path")
+        .style('fill', d => colors(d.key))
+        .attr('d', d3.area()
+            .x(d => xScale(d.data.year))
+            .y0(d => yScale(d[0]))
+            .y1(d => yScale(d[1]))
+        );
+
+        // plot title
+        svg3.append('text')
+            .attr('x', width/2)
+            .attr('y', -20)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '15px')
+            .text('Stacked streamgraph for Top 5 drivers from 2000 to 2022');
+            
+        // plot axis title
+        svg3.append('text')
+            .attr("text-anchor", "end")
+            .attr("x", width-20)
+            .attr("y", height-10)
+            .text("");
+        svg3.append("text")
+            .attr("text-anchor", "end")
+            .attr("y", 10)
+            .attr("dy", ".90em")
+            .attr("transform", "rotate(-90)")
+            .text("Total Points");
 
     });
 }
