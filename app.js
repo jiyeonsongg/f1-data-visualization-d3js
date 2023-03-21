@@ -207,7 +207,7 @@ var question2a=function(filePath){
 // QUESTION 2: WORD CLOUD - CONSTRUCTORS
 var question2b=function(filePath){
     d3.csv(filePath).then(function(data){
-        console.log(data);
+        // console.log(data);
         const margin = {top: 30, right: 30, bottom: 30, left: 30}
         const width = 900 - margin.left - margin.right
         const height = 800 - margin.top - margin.bottom
@@ -233,20 +233,35 @@ var question2b=function(filePath){
         layout.start();
 
         function draw(words) {
-            svg2b
-              .append("g")
-                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
-                .selectAll("text")
-                .data(words)
-                .enter().append("text")
-                .style("font-size", function(d) { return d.size; })
-                .style("fill", "#FF1801")
-                .attr("text-anchor", "middle")
-                .style("font-family", "Impact")
-                .attr("transform", function(d) {
-                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                })
-                .text(function(d) { return d.text; });
+            var cloud = svg2b.selectAll("g")
+                        .data(words, function(d) { return d.text; })
+
+        //Entering words
+        cloud.enter()
+            .append("text")
+            .style("font-family", "Impact")
+            .style("fill", '#FF1801')
+            .attr("text-anchor", "middle")
+            .attr('font-size', 1)
+            .text(function(d) { return d.text; });
+
+            //Entering and existing words
+            cloud
+                .transition()
+                    .duration(600)
+                    .style("font-size", function(d) { return d.size + "px"; })
+                    .attr("transform", function(d) {
+                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                    })
+                    .style("fill-opacity", 1);
+
+            //Exiting words
+            cloud.exit()
+                .transition()
+                    .duration(200)
+                    .style('fill-opacity', 1e-6)
+                    .attr('font-size', 1)
+                    .remove();
         }
 
     });
@@ -273,7 +288,7 @@ var question3=function(filePath){
             .domain([d3.min(data, d => parseFloat(d.year)), d3.max(data, d => parseFloat(d.year))])
             .range([0, width]);
         svg3.append("g").attr('transform', `translate(0, ${height})`)
-            .call(d3.axisBottom(xScale).ticks(5));
+            .call(d3.axisBottom(xScale).ticks(23));
 
         var yScale = d3.scaleLinear()
             .domain([0, 1500])
@@ -309,13 +324,32 @@ var question3=function(filePath){
             .attr("text-anchor", "end")
             .attr("x", width-20)
             .attr("y", height-10)
-            .text("");
+            .text("Year");
         svg3.append("text")
             .attr("text-anchor", "end")
             .attr("y", 10)
             .attr("dy", ".90em")
             .attr("transform", "rotate(-90)")
             .text("Total Points");
+
+        // create the legend
+        const legend = svg3.append('g').attr('class', 'legend')
+            .attr('transform', `translate(${width - margin.right - 100}, ${margin.top})`);
+        const legendItem = legend.selectAll('.legend-item')
+            .data(keys)
+            .enter()
+            .append('g')
+            .attr('class', 'legend-item')
+            .attr('transform', (d, i) => `translate(0, ${i * 20})`);
+        legendItem.append('circle')
+            .attr('cx', margin.left)
+            .attr('cy', margin.top-5)
+            .attr('r', 5)
+            .style('fill', d => colors(d));
+        legendItem.append('text')
+            .attr('x', margin.right + 15)
+            .attr('y', margin.top)
+            .text((d, i) => keys[i]);
 
     });
 }
