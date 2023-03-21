@@ -29,11 +29,14 @@ var question1=function(filePath){
             .attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
-            .attr('transform', `translate(${margin.left+20}, ${margin.top})`);
+            .attr('transform', `translate(${margin.left+20}, ${margin.top})`)
+            // .call(d3.zoom().on("zoom", function () {
+            //     svg1.attr("transform", d3.zoomTransform(this))
+            // }));
         
         // add X axis
         const x = d3.scaleLinear()
-            .domain([d3.min(data, d => parseFloat(d.lap_time)), d3.max(data, d => parseFloat(d.lap_time))])
+            .domain([d3.min(data, d => parseFloat(d.lap_time)) - 1000, d3.max(data, d => parseFloat(d.lap_time))])
             .range([0, width]);
         
         // var xAxis = svg1.append('g').attr("transform", `translate(0, ${height})`).call(d3.axisBottom(x));
@@ -43,7 +46,7 @@ var question1=function(filePath){
 
         // add Y axis
         const y = d3.scaleLinear()
-            .domain([d3.min(data, d => parseFloat(d.pit_stop)), d3.max(data, d => parseFloat(d.pit_stop))])
+            .domain([d3.min(data, d => parseFloat(d.pit_stop)) - 1000, d3.max(data, d => parseFloat(d.pit_stop))])
             .range([height, 0]);
         // var yAxis = svg1.append("g").call(d3.axisLeft(y));
         svg1.append("g")
@@ -80,18 +83,8 @@ var question1=function(filePath){
             .style("opacity", 0)
         }
 
-        // // Add a clipPath: everything out of this area won't be drawn.
-        // var clip = svg1.append("defs").append("SVG:clipPath")
-        //     .attr("id", "clip")
-        //     .append("SVG:rect")
-        //     .attr("width", width )
-        //     .attr("height", height )
-        //     .attr("x", 0)
-        //     .attr("y", 0);
-
         // add dots
         svg1.append('g')
-            // .attr('clip=path', 'url(#clip)')
             .selectAll("dot")
             .data(data)
             .enter()
@@ -104,38 +97,6 @@ var question1=function(filePath){
             .on("mouseover", mouseover )
             .on("mousemove", mousemove )
             .on("mouseleave", mouseleave )
-        
-        // // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
-        // var zoom = d3.zoom()
-        //     .scaleExtent([.5, 20])  // This control how much you can unzoom (x0.5) and zoom (x20)
-        //     .extent([[0, 0], [width, height]])
-        //     .on("zoom", updateChart);
-        //         });
-        // // This add an invisible rect on top of the chart area. This rect can recover pointer events: necessary to understand when the user zoom
-        // svg1.append("rect")
-        //     .attr("width", width)
-        //     .attr("height", height)
-        //     .style("fill", "none")
-        //     .style("pointer-events", "all")
-        //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-        //     .call(zoom);
-
-        // // A function that updates the chart when the user zoom and thus new boundaries are available
-        // function updateChart() {
-
-        //     // recover the new scale
-        //     var newX = d3.event.transform.rescaleX(x);
-        //     var newY = d3.event.transform.rescaleY(y);
-
-        //     // update axes with these new boundaries
-        //     xAxis.call(d3.axisBottom(newX))
-        //     yAxis.call(d3.axisLeft(newY))
-
-        //     // update circle position
-        //     svg1
-        //     .selectAll("circle")
-        //     .attr('cx', function(d) {return newX(parseFloat(d.lap_time))})
-        //     .attr('cy', function(d) {return newY(parseFloat(d.pit_stop))});
 
         // plot title
         svg1.append('text')
@@ -177,10 +138,10 @@ var question2a=function(filePath){
 
         var layout = d3.layout.cloud()
             .size([width, height])
-            .words(data.map(function(d) { return {text: d.driver, size:parseFloat(d.podium)}; }))
+            .words(data.map(function(d) { return {text: d.driver, size:parseFloat(d.podium_log)}; }))
             .padding(5)        //space between words
             .rotate(function() { return ~~(Math.random() * 2) * 90; })
-            .fontSize(function(d) { return d.size; })      // font size of words
+            .fontSize(function(d) { return d.size * 10; })      // font size of words
             .on("end", draw);
         layout.start();
 
@@ -225,43 +186,28 @@ var question2b=function(filePath){
 
         var layout = d3.layout.cloud()
             .size([width, height])
-            .words(data.map(function(d) { return {text: d.constructor, size: parseFloat(d.podium)}; }))
+            .words(data.map(function(d) { return {text: d.constructor, size: parseFloat(d.podium_log)}; }))
             .padding(5)        //space between words
             .rotate(function() { return ~~(Math.random() * 2) * 90; })
-            .fontSize(function(d) { return d.size; })      // font size of words
+            .fontSize(function(d) { return d.size * 10; })      // font size of words
             .on("end", draw);
         layout.start();
 
         function draw(words) {
-            var cloud = svg2b.selectAll("g")
-                        .data(words, function(d) { return d.text; })
-
-        //Entering words
-        cloud.enter()
-            .append("text")
-            .style("font-family", "Impact")
-            .style("fill", '#FF1801')
-            .attr("text-anchor", "middle")
-            .attr('font-size', 1)
-            .text(function(d) { return d.text; });
-
-            //Entering and existing words
-            cloud
-                .transition()
-                    .duration(600)
-                    .style("font-size", function(d) { return d.size + "px"; })
-                    .attr("transform", function(d) {
-                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
-                    })
-                    .style("fill-opacity", 1);
-
-            //Exiting words
-            cloud.exit()
-                .transition()
-                    .duration(200)
-                    .style('fill-opacity', 1e-6)
-                    .attr('font-size', 1)
-                    .remove();
+            svg2b
+              .append("g")
+                .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+                .selectAll("text")
+                .data(words)
+                .enter().append("text")
+                .style("font-size", function(d) { return d.size; })
+                .style("fill", "#FF1801")
+                .attr("text-anchor", "middle")
+                .style("font-family", "Impact")
+                .attr("transform", function(d) {
+                    return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                })
+                .text(function(d) { return d.text; });
         }
 
     });
@@ -655,5 +601,26 @@ var question5=function(filePath){
                         .attr("stroke", "black")
 
             })
+
+            // plot title
+        svg5.append('text')
+            .attr('x', width/2)
+            .attr('y', -18)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '15px')
+            .text('Qualifying time for Hamilton, Alonso, Räikkönen');
+            
+        // plot axis title
+        svg5.append('text')
+            .attr("text-anchor", "end")
+            .attr("x", width-20)
+            .attr("y", height-10)
+            .text("Driver");
+        svg5.append("text")
+            .attr("text-anchor", "end")
+            .attr("y", 10)
+            .attr("dy", ".90em")
+            .attr("transform", "rotate(-90)")
+            .text("Qualifying Time (msec)");
     });
 }

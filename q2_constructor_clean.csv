@@ -1,77 +1,77 @@
-constructor,podium
-Alfa Romeo,28
-AlphaTauri,2
-Alpine F1 Team,2
-Arrows,8
-Aston Martin,1
-BAR,15
-BMW Sauber,17
-BRM,61
-Benetton,102
-Brabham,78
-Brabham-BRM,1
-Brabham-Climax,11
-Brabham-Ford,9
-Brabham-Repco,25
-Brawn,15
-Connaught,1
-Cooper,6
-Cooper-BRM,2
-Cooper-Climax,44
-Cooper-Maserati,7
-Dallara,2
-Deidt,2
-Eagle-Weslake,2
-Epperly,5
-Ferrari,810
-Fittipaldi,3
-Footwork,1
-Force India,6
-Gordini,2
-Hesketh,7
-Honda,9
-Jaguar,2
-Jordan,19
-Kurtis Kraft,19
-Kuzma,3
-Lancia,1
-Larrousse,1
-Lesovsky,1
-Leyton House,1
-Ligier,50
-Lola,2
-Lotus F1,25
-Lotus-BRM,2
-Lotus-Climax,31
-Lotus-Ford,25
-March,16
-March-Ford,5
-Maserati,40
-Matra,6
-Matra-Ford,15
-McLaren,478
-McLaren-Ford,16
-Mercedes,281
-Onyx,1
-Penske,3
-Phillips,1
-Porsche,5
-Prost,3
-Racing Point,4
-Red Bull,234
-Renault,103
-Sauber,10
-Shadow,6
-Shadow-Ford,1
-Stewart,5
-Surtees,2
-Talbot-Lago,2
-Team Lotus,114
-Toleman,3
-Toro Rosso,3
-Toyota,13
-Tyrrell,77
-Vanwall,14
-Watson,5
-Williams,313
-Wolf,13
+constructor,podium,podium_log
+Alfa Romeo,28,4.807354922057604
+AlphaTauri,2,1.0
+Alpine F1 Team,2,1.0
+Arrows,8,3.0
+Aston Martin,1,0.0
+BAR,15,3.9068905956085187
+BMW Sauber,17,4.087462841250339
+BRM,61,5.930737337562887
+Benetton,102,6.672425341971495
+Brabham,78,6.285402218862249
+Brabham-BRM,1,0.0
+Brabham-Climax,11,3.4594316186372973
+Brabham-Ford,9,3.169925001442312
+Brabham-Repco,25,4.643856189774724
+Brawn,15,3.9068905956085187
+Connaught,1,0.0
+Cooper,6,2.584962500721156
+Cooper-BRM,2,1.0
+Cooper-Climax,44,5.459431618637297
+Cooper-Maserati,7,2.807354922057604
+Dallara,2,1.0
+Deidt,2,1.0
+Eagle-Weslake,2,1.0
+Epperly,5,2.321928094887362
+Ferrari,810,9.661778097771988
+Fittipaldi,3,1.584962500721156
+Footwork,1,0.0
+Force India,6,2.584962500721156
+Gordini,2,1.0
+Hesketh,7,2.807354922057604
+Honda,9,3.169925001442312
+Jaguar,2,1.0
+Jordan,19,4.247927513443585
+Kurtis Kraft,19,4.247927513443585
+Kuzma,3,1.584962500721156
+Lancia,1,0.0
+Larrousse,1,0.0
+Lesovsky,1,0.0
+Leyton House,1,0.0
+Ligier,50,5.643856189774724
+Lola,2,1.0
+Lotus F1,25,4.643856189774724
+Lotus-BRM,2,1.0
+Lotus-Climax,31,4.954196310386875
+Lotus-Ford,25,4.643856189774724
+March,16,4.0
+March-Ford,5,2.321928094887362
+Maserati,40,5.321928094887363
+Matra,6,2.584962500721156
+Matra-Ford,15,3.9068905956085187
+McLaren,478,8.900866807980748
+McLaren-Ford,16,4.0
+Mercedes,281,8.134426320220927
+Onyx,1,0.0
+Penske,3,1.584962500721156
+Phillips,1,0.0
+Porsche,5,2.321928094887362
+Prost,3,1.584962500721156
+Racing Point,4,2.0
+Red Bull,234,7.870364719583405
+Renault,103,6.6865005271832185
+Sauber,10,3.321928094887362
+Shadow,6,2.584962500721156
+Shadow-Ford,1,0.0
+Stewart,5,2.321928094887362
+Surtees,2,1.0
+Talbot-Lago,2,1.0
+Team Lotus,114,6.832890014164741
+Toleman,3,1.584962500721156
+Toro Rosso,3,1.584962500721156
+Toyota,13,3.700439718141092
+Tyrrell,77,6.266786540694901
+Vanwall,14,3.807354922057604
+Watson,5,2.321928094887362
+Williams,313,8.290018846932618
+Wolf,13,3.700439718141092
