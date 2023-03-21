@@ -39,64 +39,124 @@ var question1=function(filePath){
             .domain([d3.min(data, d => parseFloat(d.lap_time)) - 1000, d3.max(data, d => parseFloat(d.lap_time))])
             .range([0, width]);
         
-        // var xAxis = svg1.append('g').attr("transform", `translate(0, ${height})`).call(d3.axisBottom(x));
-        svg1.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x));
+        var xAxis = svg1.append('g').attr("transform", `translate(0, ${height})`).call(d3.axisBottom(x));
+        // svg1.append("g")
+        //     .attr("transform", `translate(0, ${height})`)
+        //     .call(d3.axisBottom(x));
 
         // add Y axis
         const y = d3.scaleLinear()
             .domain([d3.min(data, d => parseFloat(d.pit_stop)) - 1000, d3.max(data, d => parseFloat(d.pit_stop))])
             .range([height, 0]);
-        // var yAxis = svg1.append("g").call(d3.axisLeft(y));
-        svg1.append("g")
-            .call(d3.axisLeft(y));
-        
-        // TOOLTIP: NEED TO ADD
-        const Tooltip = d3.select("#q1_plot")
-            .append("div")
-            .style("opacity", 0)
-            .attr("class", "tooltip")
-            .style("background-color", "white")
-            .style("border", "solid")
-            .style("border-width", "1px")
-            .style("border-radius", "5px")
-            .style("padding", "10px")
+        var yAxis = svg1.append("g").call(d3.axisLeft(y));
+        // svg1.append("g")
+        //     .call(d3.axisLeft(y));
 
-        const mouseover = function(event, d) {
-            Tooltip
-            .style("opacity", 1)
-        }
-        
-        const mousemove = function(event, d) {
-            Tooltip
-            .html(`Driver Info: ${d.driver}`+ '<br>' +`Race Info: ${d.race}`)
-            .style("left", (event.x)/2 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
-            .style("top", (event.y)/2 + "px")
-        }
-        
-        // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
-        const mouseleave = function(event,d) {
-            Tooltip
-            .transition()
-            .duration(200)
-            .style("opacity", 0)
-        }
 
-        // add dots
-        svg1.append('g')
-            .selectAll("dot")
-            .data(data)
-            .enter()
-            .append("circle")
+        // Add a clipPath: everything out of this area won't be drawn.
+        var clip = svg1.append("defs").append("SVG:clipPath")
+            .attr("id", "clip")
+            .append("SVG:rect")
+            .attr("width", width )
+            .attr("height", height )
+            .attr("x", 0)
+            .attr("y", 0);
+
+        // Create the scatter variable: where both the circles and the brush take place
+        var scatter = svg1.append('g')
+        .attr("clip-path", "url(#clip)")
+        
+        // Add circles
+        scatter
+        .selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
             .attr("cx", function (d) { return x(parseFloat(d.lap_time)); } )
             .attr("cy", function (d) { return y(parseFloat(d.pit_stop)); } )
-            .attr("r", 5)
-            .style("fill", "#FF1801")
-            .style("opacity", 0.3)
-            .on("mouseover", mouseover )
-            .on("mousemove", mousemove )
-            .on("mouseleave", mouseleave )
+            .attr("r", 4)
+            .style("fill", "#61a3a9")
+            .style("opacity", 0.5)
+
+        // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
+        var zoom = d3.zoom()
+        .scaleExtent([.5, 20])  // This control how much you can unzoom (x0.5) and zoom (x20)
+        .extent([[0, 0], [width, height]])
+        .on("zoom", updateChart);
+
+        // This add an invisible rect on top of the chart area. This rect can recover pointer events: necessary to understand when the user zoom
+        svg1.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .style("fill", "none")
+        .style("pointer-events", "all")
+        .attr('transform', `translate(${margin.left+20}, ${margin.top})`)
+        .call(zoom);
+        // now the user can zoom and it will trigger the function called updateChart
+
+        // A function that updates the chart when the user zoom and thus new boundaries are available
+        function updateChart() {
+            // recover the new scale
+            var newX = d3.transform.rescaleX(x);
+            var newY = d3.transform.rescaleY(y);
+
+            // update axes with these new boundaries
+            xAxis.call(d3.axisBottom(newX))
+            yAxis.call(d3.axisLeft(newY))
+
+            // update circle position
+            scatter
+            .selectAll("circle")
+            .attr('cx', function(d) {return newX(parseFloat(d.lap_time))})
+            .attr('cy', function(d) {return newY(parseFloat(d.pit_stop))});
+        }
+
+
+        // // TOOLTIP
+        // const Tooltip = d3.select("#q1_plot")
+        //     .append("div")
+        //     .style("opacity", 0)
+        //     .attr("class", "tooltip")
+        //     .style("background-color", "white")
+        //     .style("border", "solid")
+        //     .style("border-width", "1px")
+        //     .style("border-radius", "5px")
+        //     .style("padding", "10px")
+
+        // const mouseover = function(event, d) {
+        //     Tooltip
+        //     .style("opacity", 1)
+        // }
+        
+        // const mousemove = function(event, d) {
+        //     Tooltip
+        //     .html(`Driver Info: ${d.driver}`+ '<br>' +`Race Info: ${d.race}`)
+        //     .style("left", (event.x)/2 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+        //     .style("top", (event.y)/2 + "px")
+        // }
+        
+        // // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
+        // const mouseleave = function(event,d) {
+        //     Tooltip
+        //     .transition()
+        //     .duration(200)
+        //     .style("opacity", 0)
+        // }
+
+        // // add dots
+        // svg1.append('g')
+        //     .selectAll("dot")
+        //     .data(data)
+        //     .enter()
+        //     .append("circle")
+        //     .attr("cx", function (d) { return x(parseFloat(d.lap_time)); } )
+        //     .attr("cy", function (d) { return y(parseFloat(d.pit_stop)); } )
+        //     .attr("r", 5)
+        //     .style("fill", "#FF1801")
+        //     .style("opacity", 0.3)
+        //     .on("mouseover", mouseover )
+        //     .on("mousemove", mousemove )
+        //     .on("mouseleave", mouseleave )
 
         // plot title
         svg1.append('text')
@@ -340,26 +400,20 @@ var question4=function(filePath){
                 .style('opacity', 0)
                 .style('background-color', 'white')
                 .style('border', 'solid')
-                .style('border-width', '2px')
+                .style('border-width', '1px')
                 .style('border-radious', '5px')
-                .style('padding', '5px');
+                .style('padding', '5px')
+                .style('position', 'absolute');
 
             const mouseover = function(e, d) {
-                // Tooltip.style('opacity', 1)
-                // d3.select(this).style('stroke', 'black').style('opacity', 1)
-                // Tooltip.html('Country: ' + d.country + '<br>' + 'Circuit: ' + d.name)
-                //     .style('left', (e.pageX) + 'px')
-                //     .style('top', (e.pageY) + 'px')
-                Tooltip.transition().duration(50).style('opacity', 0.9)
+                Tooltip.style('opacity', 1)
             }
             const mousemove = function (e, d) {
-                var coords = d3.pointer(e) // look more examples
                 Tooltip.html('Country: ' + d.country + '<br>' + 'Circuit: ' + d.name)
-                    .style('left', coords[0])
-                    .style('top', coords[1])
+                .style("left",(e.pageX+5)+"px").style("top",(e.pageY+5)+"px")
             }
             const mouseout = function (e, d) {
-                Tooltip.transition().duration(50).style('opacity', 0);
+                Tooltip.transition().duration(30).style('opacity', 0);
             }
 
             // create circles
