@@ -17,7 +17,6 @@ function final_project(){
 var question1=function(filePath){
     // reading data
     d3.csv(filePath).then(function(data){   
-        // console.log(data)
         // dimension and margins
         const margin = {top: 30, right: 30, bottom: 30, left: 30}
         const width = 900 - margin.left - margin.right
@@ -29,142 +28,48 @@ var question1=function(filePath){
             .attr('width', width + margin.left + margin.right)
             .attr('height', height + margin.top + margin.bottom)
             .append('g')
-            .attr('transform', `translate(${margin.left+20}, ${margin.top})`)
-            // .call(d3.zoom().on("zoom", function () {
-            //     svg1.attr("transform", d3.zoomTransform(this))
-            // }));
+            .attr('transform', `translate(${margin.left+20}, ${margin.top})`);
         
         // add X axis
         const x = d3.scaleLinear()
             .domain([d3.min(data, d => parseFloat(d.lap_time)) - 1000, d3.max(data, d => parseFloat(d.lap_time))])
             .range([0, width]);
-        
-        var xAxis = svg1.append('g').attr("transform", `translate(0, ${height})`).call(d3.axisBottom(x));
-        // svg1.append("g")
-        //     .attr("transform", `translate(0, ${height})`)
-        //     .call(d3.axisBottom(x));
+        svg1.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x));
 
         // add Y axis
         const y = d3.scaleLinear()
             .domain([d3.min(data, d => parseFloat(d.pit_stop)) - 1000, d3.max(data, d => parseFloat(d.pit_stop))])
             .range([height, 0]);
-        var yAxis = svg1.append("g").call(d3.axisLeft(y));
-        // svg1.append("g")
-        //     .call(d3.axisLeft(y));
+        svg1.append("g")
+            .call(d3.axisLeft(y));
 
-
-        // Add a clipPath: everything out of this area won't be drawn.
-        var clip = svg1.append("defs").append("SVG:clipPath")
-            .attr("id", "clip")
-            .append("SVG:rect")
-            .attr("width", width )
-            .attr("height", height )
-            .attr("x", 0)
-            .attr("y", 0);
-
-        // Create the scatter variable: where both the circles and the brush take place
-        var scatter = svg1.append('g')
-        .attr("clip-path", "url(#clip)")
-        
-        // Add circles
-        scatter
-        .selectAll("circle")
-        .data(data)
-        .enter()
-        .append("circle")
+        // add dots
+        svg1.append('g')
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
             .attr("cx", function (d) { return x(parseFloat(d.lap_time)); } )
             .attr("cy", function (d) { return y(parseFloat(d.pit_stop)); } )
-            .attr("r", 4)
-            .style("fill", "#61a3a9")
-            .style("opacity", 0.5)
+            .attr("r", 5)
+            .style("fill", "#FF1801")
+            .style("opacity", 0.3)
 
-        // Set the zoom and Pan features: how much you can zoom, on which part, and what to do when there is a zoom
-        var zoom = d3.zoom()
-        .scaleExtent([.5, 20])  // This control how much you can unzoom (x0.5) and zoom (x20)
-        .extent([[0, 0], [width, height]])
-        .on("zoom", updateChart);
-
-        // This add an invisible rect on top of the chart area. This rect can recover pointer events: necessary to understand when the user zoom
-        svg1.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .style("fill", "none")
-        .style("pointer-events", "all")
-        .attr('transform', `translate(${margin.left+20}, ${margin.top})`)
-        .call(zoom);
-        // now the user can zoom and it will trigger the function called updateChart
-
-        // A function that updates the chart when the user zoom and thus new boundaries are available
-        function updateChart() {
-            // recover the new scale
-            var newX = d3.transform.rescaleX(x);
-            var newY = d3.transform.rescaleY(y);
-
-            // update axes with these new boundaries
-            xAxis.call(d3.axisBottom(newX))
-            yAxis.call(d3.axisLeft(newY))
-
-            // update circle position
-            scatter
-            .selectAll("circle")
-            .attr('cx', function(d) {return newX(parseFloat(d.lap_time))})
-            .attr('cy', function(d) {return newY(parseFloat(d.pit_stop))});
-        }
-
-
-        // // TOOLTIP
-        // const Tooltip = d3.select("#q1_plot")
-        //     .append("div")
-        //     .style("opacity", 0)
-        //     .attr("class", "tooltip")
-        //     .style("background-color", "white")
-        //     .style("border", "solid")
-        //     .style("border-width", "1px")
-        //     .style("border-radius", "5px")
-        //     .style("padding", "10px")
-
-        // const mouseover = function(event, d) {
-        //     Tooltip
-        //     .style("opacity", 1)
-        // }
-        
-        // const mousemove = function(event, d) {
-        //     Tooltip
-        //     .html(`Driver Info: ${d.driver}`+ '<br>' +`Race Info: ${d.race}`)
-        //     .style("left", (event.x)/2 + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
-        //     .style("top", (event.y)/2 + "px")
-        // }
-        
-        // // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
-        // const mouseleave = function(event,d) {
-        //     Tooltip
-        //     .transition()
-        //     .duration(200)
-        //     .style("opacity", 0)
-        // }
-
-        // // add dots
-        // svg1.append('g')
-        //     .selectAll("dot")
-        //     .data(data)
-        //     .enter()
-        //     .append("circle")
-        //     .attr("cx", function (d) { return x(parseFloat(d.lap_time)); } )
-        //     .attr("cy", function (d) { return y(parseFloat(d.pit_stop)); } )
-        //     .attr("r", 5)
-        //     .style("fill", "#FF1801")
-        //     .style("opacity", 0.3)
-        //     .on("mouseover", mouseover )
-        //     .on("mousemove", mousemove )
-        //     .on("mouseleave", mouseleave )
+        // Brushing interactivity (reference from D3 Graph)
+        svg1.call(d3.brush()
+            .extent([[0,0],[width,height]]))
 
         // plot title
         svg1.append('text')
+            .attr('class', 'plot-title')
             .attr('x', width/2)
             .attr('y', -20)
             .attr('text-anchor', 'middle')
             .style('font-size', '15px')
-            .text('Pit stop vs. Lap time in millisecond');
+            .text('Pit stop vs. Lap time in millisecond')
+            .style('position', "front");
             
         // plot axis title
         svg1.append('text')
@@ -240,10 +145,7 @@ var question2b=function(filePath){
             .append('g')
             .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-        var sizeScale = d3.scaleLinear() // NOT WORKING
-            .domain([d3.min(data, d => parseFloat(d.podium)), d3.max(data, d => parseFloat(d.podium))])
-            .range([height, 0]);
-
+        // wordcloud (reference from D3 graph)
         var layout = d3.layout.cloud()
             .size([width, height])
             .words(data.map(function(d) { return {text: d.constructor, size: parseFloat(d.podium_log)}; }))
@@ -320,7 +222,7 @@ var question3=function(filePath){
         // plot title
         svg3.append('text')
             .attr('x', width/2)
-            .attr('y', -20)
+            .attr('y', -15)
             .attr('text-anchor', 'middle')
             .style('font-size', '15px')
             .text('Stacked streamgraph for Top 5 drivers from 2000 to 2022');
@@ -494,6 +396,7 @@ var question5=function(filePath){
 
 
         // another way to do sumstat without using d3.nest()
+        // boxplot (reference from D3 Graph + Googling)
         const groupedData = Array.from(d3.group(c_data, d => d.driver)).map(([key, values]) => {
             const sortedValues = values.map(d => parseFloat(d.qualifying)).sort(d3.ascending);
             const q1 = d3.quantile(sortedValues, 0.25);
